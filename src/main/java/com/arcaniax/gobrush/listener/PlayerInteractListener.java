@@ -32,7 +32,6 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.ItemID;
 import cn.nukkit.level.Location;
-import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.arcaniax.gobrush.Session;
@@ -40,9 +39,7 @@ import com.arcaniax.gobrush.object.BrushPlayer;
 import com.arcaniax.gobrush.util.BrushPlayerUtil;
 import com.arcaniax.gobrush.util.GuiGenerator;
 import com.arcaniax.gobrush.util.NestedFor;
-import com.boydti.fawe.FaweAPI;
 import com.boydti.fawe.nukkit.core.NukkitWorldEdit;
-import com.boydti.fawe.object.FaweQueue;
 import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
@@ -101,7 +98,7 @@ public class PlayerInteractListener implements Listener {
             LocalSession localSession = NukkitWorldEdit.inst().getSession(player);
             CompletableFuture.runAsync(() -> {
                 synchronized (localSession) {
-                    EditSession editsession = new EditSessionBuilder(FaweAPI.getWorld(loc.getLevelName())).fastmode(true).build();
+                    EditSession editsession = new EditSessionBuilder(loc.getLevelName()).fastmode(true).build();
                     try {
                         HashMap<Vector3, BaseBlock> blocksToSet = new HashMap<>();
                         try {
