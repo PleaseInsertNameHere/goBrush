@@ -24,8 +24,7 @@
 
 package com.arcaniax.gobrush.util;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
 
 import java.util.HashMap;
 
@@ -890,11 +889,6 @@ public enum XMaterial {
         this.data = data;
     }
 
-    public static boolean isNewVersion() {
-        Material mat = Material.getMaterial("RED_WOOL");
-        return mat != null;
-    }
-
     public static XMaterial requestXMaterial(String name, byte data) {
         if (cachedSearch.containsKey(name.toUpperCase() + "," + data)) {
             return cachedSearch.get(name.toUpperCase() + "," + data);
@@ -927,7 +921,7 @@ public enum XMaterial {
 
     }
 
-    public ItemStack parseItem() {
+    public Item parseItem() {
         Material mat = parseMaterial();
         if (isNewVersion()) {
             return new ItemStack(mat);
@@ -935,19 +929,10 @@ public enum XMaterial {
         return new ItemStack(mat, 1, (byte) data);
     }
 
-    public boolean isSameMaterial(ItemStack comp) {
+    public boolean isSameItem(Item item) {
         if (isNewVersion()) {
-            return comp.getType() == this.parseMaterial();
+            return item.getNamespaceId() == this.parseItem().getNamespaceId();
         }
-        if (comp.getType() == this.parseMaterial() &&
-                (int) comp.getData().getData() == this.data) {
-            return true;
-        }
-        XMaterial xmat = fromMaterial(comp.getType());
-        if (isDamageable(xmat)) {
-            return this.parseMaterial() == comp.getType();
-        }
-        return false;
     }
 
     public XMaterial fromMaterial(Material mat) {

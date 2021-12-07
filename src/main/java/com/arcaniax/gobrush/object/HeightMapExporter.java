@@ -26,15 +26,13 @@
  */
 package com.arcaniax.gobrush.object;
 
+import cn.nukkit.Player;
+import cn.nukkit.level.Level;
 import com.arcaniax.gobrush.GoBrushPlugin;
+import com.boydti.fawe.nukkit.core.NukkitWorldEdit;
+import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.IncompleteRegionException;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import org.bukkit.entity.Player;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -51,19 +49,18 @@ public class HeightMapExporter {
     int minZ;
     int maxX;
     int maxZ;
-    World w;
+    Level w;
     Player p;
 
-    public HeightMapExporter(Player p) throws IncompleteRegionException {
-        BukkitPlayer bp = new BukkitPlayer(p);
-        Region selection = WorldEdit.getInstance().getSessionManager().get(bp).getSelection(new BukkitWorld(p.getWorld()));
+    public HeightMapExporter(Player p) {
+        Region selection = NukkitWorldEdit.inst().getSession(p).getWorldSelection();
         if (selection != null) {
             worldEditSelection = true;
             minX = selection.getMinimumPoint().getBlockX();
             minZ = selection.getMinimumPoint().getBlockZ();
             maxX = selection.getMaximumPoint().getBlockX();
             maxZ = selection.getMaximumPoint().getBlockZ();
-            w = (World) p.getWorld();
+            w = p.getLevel();
             this.p = p;
         } else {
             worldEditSelection = false;
@@ -94,9 +91,8 @@ public class HeightMapExporter {
         int lowest = 254;
         for (int x = 0; x < (maxX - minX); x++) {
             for (int z = 0; z < (maxZ - minZ); z++) {
-                BukkitPlayer bp = new BukkitPlayer(p);
-                EditSession editsession = WorldEdit.getInstance().getSessionManager().get(bp).createEditSession(bp);
-                int y = editsession.getHighestTerrainBlock(x + minX, z + minZ, 0, 255);
+                EditSession editSession = new EditSessionBuilder(this.w.getName()).fastmode(true).build();
+                int y = editSession.getHighestTerrainBlock(x + minX, z + minZ, 0, 255);
                 if (y > highest) {
                     highest = y;
                 }
@@ -113,9 +109,8 @@ public class HeightMapExporter {
         BufferedImage img = new BufferedImage(blockSize, blockSize, BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < (maxX - minX); x++) {
             for (int z = 0; z < (maxZ - minZ); z++) {
-                BukkitPlayer bp = new BukkitPlayer(p);
-                EditSession editsession = WorldEdit.getInstance().getSessionManager().get(bp).createEditSession(bp);
-                int y = editsession.getHighestTerrainBlock(x + minX, z + minZ, 0, 255);
+                EditSession editSession = new EditSessionBuilder(this.w.getName()).fastmode(true).build();
+                int y = editSession.getHighestTerrainBlock(x + minX, z + minZ, 0, 255);
                 int i = (int) (((double) (y - lowest) / (double) height) * (double) 255);
                 int rgb = i; //red
                 rgb = (rgb << 8) + i;//green
@@ -128,8 +123,7 @@ public class HeightMapExporter {
         File f = new File(GoBrushPlugin.getPlugin().getDataFolder() + "/brushes/" + name + ".png");
         try {
             ImageIO.write(img, "PNG", f);
-        } catch (IOException e) {
-        }
+        } catch (IOException ignore) {}
     }
 
     private BufferedImage resize(BufferedImage bi, int size) {

@@ -26,6 +26,15 @@
  */
 package com.arcaniax.gobrush.listener;
 
+import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.inventory.InventoryClickEvent;
+import cn.nukkit.inventory.Inventory;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.MinecraftItemID;
+import cn.nukkit.utils.TextFormat;
 import com.arcaniax.gobrush.GoBrushPlugin;
 import com.arcaniax.gobrush.Session;
 import com.arcaniax.gobrush.enumeration.MainMenuSlot;
@@ -33,18 +42,6 @@ import com.arcaniax.gobrush.object.Brush;
 import com.arcaniax.gobrush.object.BrushMenu;
 import com.arcaniax.gobrush.object.BrushPlayer;
 import com.arcaniax.gobrush.util.GuiGenerator;
-import com.arcaniax.gobrush.util.XMaterial;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 
 /**
  * This class contains the listener that gets fired when an inventory is
@@ -67,97 +64,54 @@ public class InventoryClickListener implements Listener {
         }
         event.setCancelled(true);
 
-        Player player = (Player) event.getWhoClicked();
+        Player player = event.getPlayer();
         BrushPlayer brushPlayer = Session.getBrushPlayer(player.getUniqueId());
-        int rawSlot = event.getRawSlot();
+        int slot = event.getSlot();
 
-        if (MainMenuSlot.MODE_DIRECTION.isValidSlot(rawSlot)) {
+        if (MainMenuSlot.MODE_DIRECTION.isValidSlot(slot)) {
             brushPlayer.toggleDirectionMode();
-            openMenu(player);
-        } else if (MainMenuSlot.MODE_FLAT.isValidSlot(rawSlot)) {
+        } else if (MainMenuSlot.MODE_FLAT.isValidSlot(slot)) {
             brushPlayer.toggleFlatMode();
-            openMenu(player);
-        } else if (MainMenuSlot.MODE_3D.isValidSlot(rawSlot)) {
+        } else if (MainMenuSlot.MODE_3D.isValidSlot(slot)) {
             brushPlayer.toggle3DMode();
-            openMenu(player);
-        } else if (MainMenuSlot.FEATURE_AUTOROTATION.isValidSlot(rawSlot)) {
+        } else if (MainMenuSlot.FEATURE_AUTOROTATION.isValidSlot(slot)) {
             brushPlayer.toggleAutoRotation();
-            openMenu(player);
-        } else if (MainMenuSlot.BRUSH_INTENSITY.isValidSlot(rawSlot)) {
-            if (event.getClick() == ClickType.RIGHT) {
-                int intensity = brushPlayer.getBrushIntensity() - 1;
-                if (intensity > 0) {
-                    brushPlayer.setBrushIntensity(intensity);
-                }
-            } else if (event.getClick() == ClickType.LEFT) {
-                int intensity = brushPlayer.getBrushIntensity() + 1;
-                if (player.hasPermission(PERMISSION_BYPASS_MAXINTENSITY)) {
-                    brushPlayer.setBrushIntensity(intensity);
-                } else if (intensity <= brushPlayer.getMaxBrushIntensity()) {
-                    brushPlayer.setBrushIntensity(intensity);
-                }
+        } else if (MainMenuSlot.BRUSH_INTENSITY.isValidSlot(slot)) {
+            int intensity = brushPlayer.getBrushIntensity() + 1;
+            if (player.hasPermission(PERMISSION_BYPASS_MAXINTENSITY)) {
+                brushPlayer.setBrushIntensity(intensity);
+            } else if (intensity <= brushPlayer.getMaxBrushIntensity()) {
+                brushPlayer.setBrushIntensity(intensity);
             }
-            openMenu(player);
-        } else if (MainMenuSlot.BRUSH_SIZE.isValidSlot(rawSlot)) {
-            if (event.getClick() == ClickType.RIGHT) {
-                int size = brushPlayer.getBrushSize() - 2;
-                if (size > 0) {
-                    brushPlayer.setBrushSize(size);
-                }
-            } else if (event.getClick() == ClickType.LEFT) {
-                int size = brushPlayer.getBrushSize() + 2;
-                if (player.hasPermission(PERMISSION_BYPASS_MAXSIZE)) {
-                    brushPlayer.setBrushSize(size);
-                    brushPlayer.getBrush().resize(size);
-                } else if (size <= brushPlayer.getMaxBrushSize()) {
-                    brushPlayer.setBrushSize(size);
-                    brushPlayer.getBrush().resize(size);
-                }
-            } else if (event.getClick() == ClickType.SHIFT_RIGHT) {
-                int size = brushPlayer.getBrushSize() - 10;
-                if (size > 0) {
-                    brushPlayer.setBrushSize(size);
-                }
-            } else if (event.getClick() == ClickType.SHIFT_LEFT) {
-                int size = brushPlayer.getBrushSize() + 10;
-                if (player.hasPermission(PERMISSION_BYPASS_MAXSIZE)) {
-                    brushPlayer.setBrushSize(size);
-                    brushPlayer.getBrush().resize(size);
-                } else if (size <= brushPlayer.getMaxBrushSize()) {
-                    brushPlayer.setBrushSize(size);
-                    brushPlayer.getBrush().resize(size);
-                }
+        } else if (MainMenuSlot.BRUSH_SIZE.isValidSlot(slot)) {
+            int size = brushPlayer.getBrushSize() + 2;
+            if (player.hasPermission(PERMISSION_BYPASS_MAXSIZE)) {
+                brushPlayer.setBrushSize(size);
+                brushPlayer.getBrush().resize(size);
+            } else if (size <= brushPlayer.getMaxBrushSize()) {
+                brushPlayer.setBrushSize(size);
+                brushPlayer.getBrush().resize(size);
             }
-
-            openMenu(player);
-        } else if (MainMenuSlot.BRUSH_SELECTOR.isValidSlot(rawSlot)) {
-            if (event.getClick() == ClickType.RIGHT) {
-                brushPlayer.toggleBrushEnabled();
-                openMenu(player);
-            } else if (event.getClick() == ClickType.LEFT) {
-                player.updateInventory();
+        } else if (MainMenuSlot.BRUSH_SELECTOR.isValidSlot(slot)) {
+            if (event.getHeldItem() != null
+                    && event.getHeldItem().getId() != Item.AIR
+                    && event.getSourceItem() != null
+                    && event.getSourceItem().getId() != Item.AIR
+            ) {
                 amountOfValidBrushes = GoBrushPlugin.amountOfValidBrushes;
                 if (amountOfValidBrushes == 0) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes(
-                            '&',
-                            "&bgoBrush> &cWARNING! The automatic brush installation failed because the server cannot connect to GitHub."
-                    ));
-                    player.spigot().sendMessage(new ComponentBuilder("goBrush> ").color(ChatColor.AQUA)
-                            .append("Click here to download the default brushes manually.").color(ChatColor.GOLD)
-                            .event(new ClickEvent(
-                                    ClickEvent.Action.OPEN_URL,
-                                    "https://github.com/Arcaniax-Development/goBrush-Assets/blob/main/brushes.zip?raw=true"
-                            )).create());
-                    player.sendMessage(ChatColor.translateAlternateColorCodes(
-                            '&',
-                            "&bgoBrush> &cExtract the zip into &e/plugins/goBrush/brushes"
-                    ));
+                    player.sendMessage("&bgoBrush> &cWARNING! The automatic brush installation failed because the server cannot connect to GitHub.");
+                    player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.GOLD + "Download the default brushes manually here: https://github.com/Arcaniax-Development/goBrush-Assets/blob/main/brushes.zip?raw=true");
+                    player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.RED + "Extract the zip into " + TextFormat.YELLOW + "/plugins/goBrush/brushes");
                 } else {
                     Session.initializeBrushMenu();
-                    player.openInventory(Session.getBrushMenu().getPage(0).getInventory());
+                    player.addWindow(Session.getBrushMenu().getPage(0).getInventory());
                 }
+            } else {
+                brushPlayer.toggleBrushEnabled();
             }
         }
+        openMenu(player);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -167,29 +121,23 @@ public class InventoryClickListener implements Listener {
         }
         event.setCancelled(true);
 
-        if (event.isShiftClick()) {
-            return;
-        }
-
-        Player player = (Player) event.getWhoClicked();
+        Player player = event.getPlayer();
         BrushPlayer brushPlayer = Session.getBrushPlayer(player.getUniqueId());
         BrushMenu brushMenu = Session.getBrushMenu();
-        int rawSlot = event.getRawSlot();
+        int slot = event.getSlot();
         int pageNumber = 0;
         for (int i = 0; i < Session.getBrushMenu().getAmountOfPages(); i++) {
             if (event.getInventory().equals(Session.getBrushMenu().getPage(i).getInventory())) {
                 pageNumber = i;
             }
         }
-        switch (rawSlot) {
+        switch (slot) {
             case (45): {
-                if (event.getCurrentItem().getType().equals(XMaterial.ARROW.parseMaterial())) {
+                if (event.getInventory().getItem(slot).getId() == MinecraftItemID.ARROW.get(1).getId()) {
                     if (pageNumber == 0) {
-                        player.updateInventory();
-                        player.openInventory(brushMenu.getPage(brushMenu.getAmountOfPages() - 1).getInventory());
+                        GuiGenerator.openMenu(player, brushMenu.getPage(brushMenu.getAmountOfPages() - 1).getInventory());
                     } else {
-                        player.updateInventory();
-                        player.openInventory(brushMenu.getPage(pageNumber - 1).getInventory());
+                        GuiGenerator.openMenu(player, brushMenu.getPage(pageNumber - 1).getInventory());
                     }
                 }
 
@@ -200,21 +148,19 @@ public class InventoryClickListener implements Listener {
                 break;
             }
             case (53): {
-                if (event.getCurrentItem().getType().equals(XMaterial.ARROW.parseMaterial())) {
+                if (event.getInventory().getItem(slot).getId() == MinecraftItemID.ARROW.get(1).getId()) {
                     if (pageNumber == brushMenu.getAmountOfPages() - 1) {
-                        player.updateInventory();
-                        player.openInventory(brushMenu.getPage(0).getInventory());
+                        GuiGenerator.openMenu(player, brushMenu.getPage(0).getInventory());
                     } else {
-                        player.updateInventory();
-                        player.openInventory(brushMenu.getPage(pageNumber + 1).getInventory());
+                        GuiGenerator.openMenu(player, brushMenu.getPage(pageNumber + 1).getInventory());
                     }
                 }
                 break;
             }
             default: {
-                if (event.getCurrentItem() != null) {
-                    if (event.getCurrentItem().getType().equals(XMaterial.MAP.parseMaterial())) {
-                        String name = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName());
+                if (event.getInventory().getItem(slot) != null) {
+                    if (event.getInventory().getItem(slot).getId() == MinecraftItemID.EMPTY_MAP.get(1).getId()) {
+                        String name = TextFormat.clean(event.getInventory().getItem(slot).getCustomName());
                         int size = brushPlayer.getBrushSize();
                         Brush brush = Session.getBrush(name);
                         brushPlayer.setBrush(brush);
@@ -235,17 +181,9 @@ public class InventoryClickListener implements Listener {
      *         otherwise.
      */
     private boolean isInvalidInventory(InventoryClickEvent event, String inventoryName) {
-        final InventoryView view = event.getView();
+        final Inventory view = event.getInventory();
         final String title = view.getTitle();
-        if (!title.contains(inventoryName)) {
-            return true;
-        }
-
-        event.setCancelled(true);
-
-        final Inventory topInventory = view.getTopInventory();
-        final Inventory clickedInventory = event.getClickedInventory();
-        return topInventory != clickedInventory;
+        return title.contains(inventoryName);
     }
 
     /**
@@ -255,7 +193,7 @@ public class InventoryClickListener implements Listener {
      * @param player The player that needs to open the inventory again.
      */
     private void openMenu(Player player) {
-        player.openInventory(GuiGenerator.generateMainMenu(Session.getBrushPlayer(player.getUniqueId())));
+        GuiGenerator.openMenu(player, GuiGenerator.generateMainMenu(Session.getBrushPlayer(player.getUniqueId())));
     }
 
 }

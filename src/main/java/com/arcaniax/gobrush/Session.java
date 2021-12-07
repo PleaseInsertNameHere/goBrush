@@ -26,14 +26,13 @@
  */
 package com.arcaniax.gobrush;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.plugin.Plugin;
 import com.arcaniax.gobrush.object.Brush;
 import com.arcaniax.gobrush.object.BrushMenu;
 import com.arcaniax.gobrush.object.BrushPlayer;
 import com.arcaniax.gobrush.object.Config;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class Session {
     private static Map<UUID, BrushPlayer> brushPlayers;
     private static Map<String, Brush> validBrushes;
     private static Config config;
-    private static WorldEditPlugin worldEdit;
+    private static Plugin worldEdit;
     private static BrushMenu brushMenu;
 
     /**
@@ -66,7 +65,7 @@ public class Session {
      */
     public static void initializeBrushPlayers() {
         brushPlayers = new HashMap<>();
-        for (Player p : Bukkit.getOnlinePlayers()) {
+        for (Player p : Server.getInstance().getOnlinePlayers().values()) {
             Session.addBrushPlayer(p.getUniqueId());
         }
     }
@@ -114,7 +113,7 @@ public class Session {
      *
      * @param config The configuration file of the goBrush plugin.
      */
-    public static void initializeConfig(FileConfiguration config) {
+    public static void initializeConfig(cn.nukkit.utils.Config config) {
         Session.config = new Config(config);
     }
 
@@ -297,7 +296,7 @@ public class Session {
      *
      * @return The WorldEditPlugin instance.
      */
-    public static WorldEditPlugin getWorldEdit() {
+    public static Plugin getWorldEdit() {
         return worldEdit;
     }
 
@@ -306,7 +305,7 @@ public class Session {
      *
      * @param worldEdit The WorldEditPlugin instance.
      */
-    public static void setWorldEdit(WorldEditPlugin worldEdit) {
+    public static void setWorldEdit(Plugin worldEdit) {
         Session.worldEdit = worldEdit;
     }
 

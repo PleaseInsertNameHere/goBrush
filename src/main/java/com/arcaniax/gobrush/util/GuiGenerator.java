@@ -26,16 +26,20 @@
  */
 package com.arcaniax.gobrush.util;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.inventory.Inventory;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.MinecraftItemID;
+import cn.nukkit.utils.TextFormat;
+import com.arcaniax.gobrush.GoBrushPlugin;
+import com.arcaniax.gobrush.Session;
+import com.arcaniax.gobrush.enumeration.MainMenuSlot;
 import com.arcaniax.gobrush.object.BrushPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import com.nukkitx.fakeinventories.inventory.ChestFakeInventory;
+import com.nukkitx.fakeinventories.inventory.FakeInventory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * This class contains a utility used for generating the goBrush main menu
@@ -45,37 +49,12 @@ import java.util.List;
  */
 public class GuiGenerator {
 
-    private static final String MAIN_MENU_INVENTORY_TITLE = "&1goBrush Menu";
-    private static final ItemStack GRAY_GLASS_PANE = createItem(
-            XMaterial.GRAY_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.GRAY_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
-    private static final ItemStack GREEN_GLASS_PANE = createItem(
-            XMaterial.GREEN_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.GREEN_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
-    private static final ItemStack ORANGE_GLASS_PANE = createItem(
-            XMaterial.ORANGE_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.ORANGE_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
-    private static final ItemStack RED_GLASS_PANE = createItem(
-            XMaterial.RED_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.RED_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
-    private static final ItemStack WHITE_GLASS_PANE = createItem(
-            XMaterial.WHITE_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.WHITE_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
+    private static final String MAIN_MENU_INVENTORY_TITLE = TextFormat.BLUE + "goBrush Menu";
+    private static final Item GRAY_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 7, TextFormat.GOLD.toString(), "");
+    private static final Item GREEN_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 13, TextFormat.GOLD.toString(), "");
+    private static final Item ORANGE_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 1, TextFormat.GOLD.toString(), "");
+    private static final Item RED_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 14, TextFormat.GOLD.toString(), "");
+    private static final Item WHITE_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 0, TextFormat.GOLD.toString(), "");
 
     /**
      * This method generates the goBrush main menu based on the BrushPlayer's
@@ -84,28 +63,25 @@ public class GuiGenerator {
      * @param brushPlayer The BrushPlayer that this main menu belongs to.
      * @return The generated goBrush main menu inventory.
      */
-    public static Inventory generateMainMenu(BrushPlayer brushPlayer) {
-        Inventory mainMenu = Bukkit.createInventory(
-                null,
-                27,
-                ChatColor.translateAlternateColorCodes('&', MAIN_MENU_INVENTORY_TITLE)
-        );
+    public static FakeInventory generateMainMenu(BrushPlayer brushPlayer) {
+        ChestFakeInventory mainMenu = new ChestFakeInventory();
+        mainMenu.setTitle(MAIN_MENU_INVENTORY_TITLE);
         for (int i = 0; i < 27; i++) {
             mainMenu.setItem(i, GRAY_GLASS_PANE);
         }
 
         mainMenu.setItem(
                 11,
-                createItem(XMaterial.BROWN_MUSHROOM.parseMaterial(),
-                        (short) 0,
+                createItem(MinecraftItemID.BROWN_MUSHROOM.get(1),
+                        0,
                         "&6Size: &e" + brushPlayer.getBrushSize(),
                         "&63D Size: &e" + (double) brushPlayer.getBrushSize() / 4.0 + "___&3___&7Left click to increase&3___&7Right click to decrease___&7Shift click to change by 10"
                 )
         );
         mainMenu.setItem(
                 12,
-                createItem(XMaterial.BLAZE_POWDER.parseMaterial(),
-                        (short) 0,
+                createItem(MinecraftItemID.BLAZE_POWDER.get(1),
+                        0,
                         "&6Intensity: &e" + brushPlayer.getBrushIntensity(),
                         "&3___&7Left click to increase&3___&7Right click to decrease"
                 )
@@ -127,7 +103,7 @@ public class GuiGenerator {
         if (brushPlayer.isBrushEnabled()) {
             mainMenu.setItem(
                     10,
-                    createItem(XMaterial.WRITABLE_BOOK.parseMaterial(),
+                    createItem(MinecraftItemID.WRITABLE_BOOK.get(1),
                             (short) 0,
                             "&6Selected Brush: &e" + brushPlayer.getBrush().getName(),
                             "&a&lEnabled___&7___&7Left click to change brush___&7Right click to toggle"
@@ -138,7 +114,7 @@ public class GuiGenerator {
         } else {
             mainMenu.setItem(
                     10,
-                    createItem(XMaterial.WRITABLE_BOOK.parseMaterial(),
+                    createItem(MinecraftItemID.WRITABLE_BOOK.get(1),
                             (short) 0,
                             "&6Selected Brush: &e" + brushPlayer.getBrush().getName(),
                             "&c&lDisabled___&7___&7Left click to change brush___&7Right click to toggle"
@@ -148,27 +124,27 @@ public class GuiGenerator {
             mainMenu.setItem(19, RED_GLASS_PANE);
         }
         if (brushPlayer.isDirectionMode()) {
-            mainMenu.setItem(13, HeadURL.create(HeadURL.upB64, "&6Pull Mode", "&7Click to change"));
+            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName("&6Pull Mode").setLore("&7Click to change"));
             mainMenu.setItem(4, ORANGE_GLASS_PANE);
             mainMenu.setItem(22, ORANGE_GLASS_PANE);
         } else {
-            mainMenu.setItem(13, HeadURL.create(HeadURL.downB64, "&6Push Mode", "&7Click to change"));
+            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName("&6Push Mode").setLore("&7Click to change"));
             mainMenu.setItem(4, ORANGE_GLASS_PANE);
             mainMenu.setItem(22, ORANGE_GLASS_PANE);
         }
         if (brushPlayer.is3DMode()) {
-            mainMenu.setItem(14, HeadURL.create(HeadURL._3DB64, "&63D Mode", "&a&lEnabled___&7___&7Click to toggle"));
+            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName("&63D Mode").setLore("&a&lEnabled___&7___&7Click to toggle"));
             mainMenu.setItem(5, GREEN_GLASS_PANE);
             mainMenu.setItem(23, GREEN_GLASS_PANE);
         } else {
-            mainMenu.setItem(14, HeadURL.create(HeadURL._3DB64, "&63D Mode", "&c&lDisabled___&7___&7Click to toggle"));
+            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName("&63D Mode").setLore("&c&lDisabled___&7___&7Click to toggle"));
             mainMenu.setItem(5, RED_GLASS_PANE);
             mainMenu.setItem(23, RED_GLASS_PANE);
         }
         if (brushPlayer.isFlatMode()) {
             mainMenu.setItem(
                     15,
-                    createItem(XMaterial.HEAVY_WEIGHTED_PRESSURE_PLATE.parseMaterial(),
+                    createItem(MinecraftItemID.HEAVY_WEIGHTED_PRESSURE_PLATE.get(1),
                             (short) 0,
                             "&6Flat Mode",
                             "&a&lEnabled___&7___&7Click to toggle"
@@ -179,8 +155,8 @@ public class GuiGenerator {
         } else {
             mainMenu.setItem(
                     15,
-                    createItem(XMaterial.HEAVY_WEIGHTED_PRESSURE_PLATE.parseMaterial(),
-                            (short) 0,
+                    createItem(MinecraftItemID.HEAVY_WEIGHTED_PRESSURE_PLATE.get(1),
+                            0,
                             "&6Flat Mode",
                             "&c&lDisabled___&7___&7Click to toggle"
                     )
@@ -192,8 +168,8 @@ public class GuiGenerator {
         if (brushPlayer.isAutoRotation()) {
             mainMenu.setItem(
                     16,
-                    createItem(XMaterial.COMPASS.parseMaterial(),
-                            (short) 0,
+                    createItem(MinecraftItemID.COMPASS.get(1),
+                            0,
                             "&6Auto Rotation",
                             "&a&lEnabled___&7___&7Click to toggle"
                     )
@@ -203,8 +179,8 @@ public class GuiGenerator {
         } else {
             mainMenu.setItem(
                     16,
-                    createItem(XMaterial.COMPASS.parseMaterial(),
-                            (short) 0,
+                    createItem(MinecraftItemID.COMPASS.get(1),
+                            0,
                             "&6Auto Rotation",
                             "&c&lDisabled___&7___&7Click to toggle"
                     )
@@ -215,26 +191,18 @@ public class GuiGenerator {
         return mainMenu;
     }
 
-    private static ItemStack createItem(Material material, short data, String name, String lore) {
-        ItemStack is = new ItemStack(material);
-        ItemMeta meta = is.getItemMeta();
-        if (!lore.equals("")) {
-            String[] loreListArray = lore.split("___");
-            List<String> loreList = new ArrayList<String>();
-            String[] arrayOfString1;
-            int j = (arrayOfString1 = loreListArray).length;
-            for (int i = 0; i < j; i++) {
-                String s = arrayOfString1[i];
-                loreList.add(ChatColor.translateAlternateColorCodes('&', s));
-            }
-            meta.setLore(loreList);
-        }
-        if (!name.equals("")) {
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        }
-        is.setItemMeta(meta);
-        is.setDurability(data);
-        return is;
+    private static Item createItem(Item item, int damage, String name, String... lore) {
+        item.setCustomName(name).setLore(lore);
+        item.setDamage(damage);
+        return item;
     }
 
+    public static void openMenu(Player player, Inventory inventory) {
+        Optional<Inventory> inv = player.getTopWindow();
+        if (inv.isPresent() && inv.get() instanceof FakeInventory) {
+            player.removeWindow(inv.get());
+        }
+
+        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 20, true);
+    }
 }

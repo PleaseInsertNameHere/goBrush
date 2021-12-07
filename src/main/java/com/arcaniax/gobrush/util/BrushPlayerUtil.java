@@ -26,13 +26,15 @@
  */
 package com.arcaniax.gobrush.util;
 
+import cn.nukkit.Player;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
+import cn.nukkit.level.Location;
+import cn.nukkit.math.Vector3;
 import com.arcaniax.gobrush.Session;
 import com.arcaniax.gobrush.object.BrushPlayer;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.math.Vector3;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
+import com.sk89q.worldedit.Vector;
 
 /**
  * This class contains a bunch of utilities that can be used for determinating
@@ -45,20 +47,20 @@ public class BrushPlayerUtil {
     public static Location getClosest(Player player, Location _loc, Location l, int brushSize, EditSession session) {
         Location loc = _loc.clone();
 
-        while (loc.getBlock().getType() == XMaterial.AIR.parseMaterial()
-                || (!(session.getMask() == null || session.getMask().test(Vector3
-                .at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())
+        while (loc.getLevelBlock().getId() == BlockID.AIR
+                || (!(session.getMask() == null || session.getMask().test(new Vector(loc.x, loc.y, loc.z)
                 .toBlockPoint())))
                 && (loc.distance(l.clone().add(0.5, 0.5, 0.5)) < ((double) brushSize / (double) 4))) {
-            Vector v = player.getEyeLocation().getDirection();
-            loc.add(v.multiply(0.5));
+            Vector3 v3 = player.getDirectionVector();
+            Vector v = new Vector(v3.x, v3.y, v3.z);
+            loc = loc.add(v3.multiply(0.5));
             if (!BlockUtils.isLoaded(loc)) {
                 return null;
             }
-            if (loc.getBlockY() <= 0) {
+            if (loc.y <= 0) {
                 break;
             }
-            if (loc.getBlockY() > 255) {
+            if (loc.y > 255) {
                 return null;
             }
             if (loc.distance(_loc) > 200) {
@@ -69,20 +71,21 @@ public class BrushPlayerUtil {
     }
 
     public static Location getClosest(Player player) {
-        Location loc = player.getEyeLocation();
-        while (loc.getBlock().getType() == XMaterial.AIR.parseMaterial()) {
-            Vector v = player.getEyeLocation().getDirection();
-            loc.add(v.multiply(0.5));
+        Location loc = player.getTargetBlock(200).getLocation();
+        while (loc.getLevelBlock().getId() == BlockID.AIR) {
+            Vector3 v3 = player.getDirectionVector();
+            Vector v = new Vector(v3.x, v3.y, v3.z);
+            loc = loc.add(v3.multiply(0.5));
             if (!BlockUtils.isLoaded(loc)) {
                 return null;
             }
-            if (loc.getBlockY() <= 0) {
+            if (loc.y <= 0) {
                 break;
             }
-            if (loc.getBlockY() > 255) {
+            if (loc.y > 255) {
                 return null;
             }
-            if (loc.distance(player.getEyeLocation()) > 200) {
+            if (loc.distance(player.getDirectionVector()) > 200) {
                 return null;
             }
         }

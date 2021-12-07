@@ -26,11 +26,11 @@
  */
 package com.arcaniax.gobrush.listener;
 
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerAsyncPreLoginEvent;
 import com.arcaniax.gobrush.Session;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 /**
  * This class contains the listener that gets fired upon player join. This
@@ -48,8 +48,8 @@ public class PlayerJoinListener implements Listener {
      * @param event The event that is fired upon a AsyncPlayerPreLoginEvent.
      */
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onPlayerJoinEvent(AsyncPlayerPreLoginEvent event) {
-        Session.addBrushPlayer(event.getUniqueId());
+    public void onPlayerJoinEvent(PlayerAsyncPreLoginEvent event) {
+        Session.addBrushPlayer(event.getUuid());
     }
 
 }

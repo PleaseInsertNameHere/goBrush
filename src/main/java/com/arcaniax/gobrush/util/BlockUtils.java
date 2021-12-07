@@ -26,14 +26,14 @@
  */
 package com.arcaniax.gobrush.util;
 
-import org.bukkit.Location;
+import cn.nukkit.level.Location;
 
 public class BlockUtils {
 
     public static boolean isLoaded(Location l) {
-        int x = l.getBlockX() >> 4;
-        int z = l.getBlockZ() >> 4;
-        return l.getWorld().isChunkLoaded(x, z);
+        int x = (int) l.x >> 4;
+        int z = (int) l.y >> 4;
+        return l.getLevel().isChunkLoaded(x, z);
     }
 
 }

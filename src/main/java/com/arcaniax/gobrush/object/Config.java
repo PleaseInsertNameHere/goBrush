@@ -26,8 +26,6 @@
  */
 package com.arcaniax.gobrush.object;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.util.List;
 
 /**
@@ -51,25 +49,8 @@ public class Config {
      *
      * @param config The configuration file of the goBrush plugin.
      */
-    public Config(FileConfiguration config) {
-        this.defaultBrushSize = config.getInt("defaults.size");
-        this.defaultBrushIntensity = config.getInt("defaults.intensity");
-        this.imgLoreSize = config.getInt("defaults.imgloresize");
-        this.defaultDirectionMode = !config.getBoolean("defaults.Directionmode");
-        this.default3DMode = config.getBoolean("defaults.3Dmode");
-        this.defaultBoundingBox = config.getBoolean("defaults.boundingbox");
-        this.defaultAutoRotation = config.getBoolean("defaults.autorotation");
-        this.defaultBrushEnabled = config.getBoolean("defaults.brushenabled");
-        this.defaultBrushName = config.getString("defaults.brushname");
-        this.maxBrushSize = config.getInt("maximums.size");
-        this.maxBrushIntensity = config.getInt("maximums.intensity");
-        this.disabledWorlds = config.getStringList("disabledworlds");
-        if (this.maxBrushSize % 2 == 0) {
-            this.maxBrushSize++;
-        }
-        if (this.defaultBrushSize % 2 == 0) {
-            this.defaultBrushSize++;
-        }
+    public Config(cn.nukkit.utils.Config config) {
+        reload(config);
     }
 
     /**
@@ -77,7 +58,7 @@ public class Config {
      *
      * @param config The configuration file of the goBrush plugin.
      */
-    public void reload(FileConfiguration config) {
+    public void reload(cn.nukkit.utils.Config config) {
         this.defaultBrushSize = config.getInt("defaults.size");
         this.defaultBrushIntensity = config.getInt("defaults.intensity");
         this.imgLoreSize = config.getInt("defaults.imgloresize");
@@ -113,7 +94,6 @@ public class Config {
     public boolean isDefaultAutoRotation() {
         return defaultAutoRotation;
     }
-
 
     public boolean isDefaultBrushEnabled() {
         return defaultBrushEnabled;

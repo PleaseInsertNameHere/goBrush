@@ -26,11 +26,11 @@
  */
 package com.arcaniax.gobrush.listener;
 
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerQuitEvent;
 import com.arcaniax.gobrush.Session;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * This class contains the EventHandler for the PlayerQuitEvent. This Listener

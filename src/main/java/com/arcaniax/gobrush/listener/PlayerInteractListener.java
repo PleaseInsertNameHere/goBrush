@@ -26,34 +26,33 @@
  */
 package com.arcaniax.gobrush.listener;
 
+import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.item.ItemID;
+import cn.nukkit.level.Location;
+import cn.nukkit.math.BlockVector3;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.TextFormat;
 import com.arcaniax.gobrush.Session;
 import com.arcaniax.gobrush.object.BrushPlayer;
 import com.arcaniax.gobrush.util.BrushPlayerUtil;
 import com.arcaniax.gobrush.util.GuiGenerator;
 import com.arcaniax.gobrush.util.NestedFor;
-import com.arcaniax.gobrush.util.XMaterial;
-import com.fastasyncworldedit.core.Fawe;
-import com.fastasyncworldedit.core.queue.implementation.QueueHandler;
+import com.boydti.fawe.FaweAPI;
+import com.boydti.fawe.nukkit.core.NukkitWorldEdit;
+import com.boydti.fawe.object.FaweQueue;
+import com.boydti.fawe.util.EditSessionBuilder;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.world.block.BlockState;
-import com.sk89q.worldedit.world.block.BlockTypes;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.util.Vector;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class contains the listener that gets fired when a player interacts with
@@ -63,14 +62,14 @@ import java.util.Random;
  */
 public class PlayerInteractListener implements Listener {
 
-    private static final String PREFIX = "&bgoBrush> ";
+    private static final String PREFIX = TextFormat.AQUA + "goBrush> ";
     private static final String PERMISSION_BYPASS_WORLD = "gobrush.bypass.world";
     private static final String PERMISSION_USE = "gobrush.use";
 
     @EventHandler
     public void onClickEvent(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
-        final boolean holdingFlint = player.getInventory().getItemInMainHand().getType() == Material.FLINT;
+        final boolean holdingFlint = player.getInventory().getItemInHand().getId() == ItemID.FLINT;
 
         if (!holdingFlint) {
             return;
@@ -78,42 +77,38 @@ public class PlayerInteractListener implements Listener {
         if (!player.hasPermission(PERMISSION_USE)) {
             return;
         }
-        if (event.getPlayer().getInventory().getItemInMainHand().getType() == XMaterial.FLINT.parseMaterial()
-                && ((event.getAction().equals(Action.RIGHT_CLICK_AIR))
-                || (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)))) {
+        if (event.getPlayer().getInventory().getItemInHand().getId() == ItemID.FLINT
+                && ((event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_AIR))
+                || (event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)))) {
             BrushPlayer brushPlayer = Session.getBrushPlayer(player.getUniqueId());
-            if ((Session.getConfig().getDisabledWorlds().contains(player.getWorld().getName())) && (!player.hasPermission(
+            if ((Session.getConfig().getDisabledWorlds().contains(player.getLevelName())) && (!player.hasPermission(
                     PERMISSION_BYPASS_WORLD))) {
                 return;
             }
             if (!(brushPlayer.isBrushEnabled())) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes(
-                        '&',
-                        PREFIX + "&cYour brush is disabled, left click to enable the brush or type &f/gb toggle&c."
-                ));
+                player.sendMessage(PREFIX + TextFormat.RED + "Your brush is disabled, left click to enable the brush or type " + TextFormat.WHITE + "/gb toggle" + TextFormat.RED + ".");
                 return;
             }
             Location loc;
-            if (event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+            if (event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_AIR)) {
                 loc = BrushPlayerUtil.getClosest(player);
             } else {
-                loc = event.getClickedBlock().getLocation().clone();
+                loc = event.getBlock().getLocation().clone();
             }
             if (loc == null) {
                 return;
             }
-            LocalSession localSession = WorldEdit.getInstance().getSessionManager().get(BukkitAdapter.adapt(event.getPlayer()));
-            QueueHandler queue = Fawe.get().getQueueHandler();
-            queue.async(() -> {
+            LocalSession localSession = NukkitWorldEdit.inst().getSession(player);
+            CompletableFuture.runAsync(() -> {
                 synchronized (localSession) {
-                    EditSession editsession = localSession.createEditSession(BukkitAdapter.adapt(event.getPlayer()));
+                    EditSession editsession = new EditSessionBuilder(FaweAPI.getWorld(loc.getLevelName())).fastmode(true).build();
                     try {
-                        HashMap<Vector3, BlockState> blocksToSet = new HashMap<>();
+                        HashMap<Vector3, BaseBlock> blocksToSet = new HashMap<>();
                         try {
                             editsession.setFastMode(false);
                             int size = brushPlayer.getBrushSize();
-                            Location start = player.getEyeLocation();
-                            Vector v = start.getDirection().normalize();
+                            Vector3 start = player.getDirectionVector();
+                            Vector v = new Vector(start.x, start.y, start.z);
                             double rot = (player.getLocation().getYaw() - 90.0F) % 360.0F + 360.0F;
                             final double rotation = (rot / 360.0F) * (2 * Math.PI);
                             double rotPitch = (player.getLocation().getPitch()) % 360.0F;
@@ -128,38 +123,37 @@ public class PlayerInteractListener implements Listener {
                                 for (int x = min; x <= max; x++) {
                                     for (int z = min; z <= max; z++) {
                                         Location loopLoc = loc.clone().add(x, 0.0D, z);
-                                        int worldHeight = editsession.getHighestTerrainBlock(
-                                                loopLoc.getBlockX(),
-                                                loopLoc.getBlockZ(),
+                                        double worldHeight = editsession.getHighestTerrainBlock(
+                                                (int) loopLoc.x,
+                                                (int) loopLoc.z,
                                                 0,
                                                 255
                                         );
                                         if (editsession.getMask() == null || editsession
                                                 .getMask()
-                                                .test(BlockVector3.at(loopLoc.getBlockX(), worldHeight, loopLoc.getBlockZ()))) {
+                                                .test(new BlockVector(loopLoc.x, worldHeight, loopLoc.z))) {
                                             double height = BrushPlayerUtil.getHeight(player, x - min, z - min, cardinal);
                                             double subHeight = height % 1.0D;
                                             if (random > 1.0 - subHeight) {
                                                 height++;
                                             }
                                             Location l = new Location(
-                                                    loopLoc.getWorld(),
-                                                    loopLoc.getBlockX(),
+                                                    loopLoc.x,
                                                     worldHeight,
-                                                    loopLoc.getBlockZ()
+                                                    loopLoc.z,
+                                                    loopLoc.getLevel()
                                             );
                                             if (brushPlayer.isDirectionMode()) {
                                                 for (int y = 1; y < Math.floor(height); y++) {
-                                                    if ((!brushPlayer.isFlatMode()) || l.getBlockY() + y <= loc.getY()) {
+                                                    if ((!brushPlayer.isFlatMode()) || l.y + y <= loc.getY()) {
                                                         try {
                                                             blocksToSet.put(
-                                                                    Vector3.at(
-                                                                            l.getBlockX(),
-                                                                            l.getBlockY() + y,
-                                                                            l.getBlockZ()
+                                                                    new Vector3(
+                                                                            l.x,
+                                                                            l.y + y,
+                                                                            l.z
                                                                     ),
-                                                                    editsession.getBlock(Vector3
-                                                                            .at(l.getBlockX(), l.getBlockY(), l.getBlockZ())
+                                                                    editsession.getBlock(new Vector(l.x, l.y, l.z)
                                                                             .toBlockPoint())
                                                             );
                                                         } catch (Exception ignored) {
@@ -168,17 +162,16 @@ public class PlayerInteractListener implements Listener {
                                                 }
                                             } else {
                                                 for (int y = 0; y < Math.floor(height); y++) {
-                                                    if ((!brushPlayer.isFlatMode()) || l.getBlockY() - y > loc.getY()) {
-                                                        if (editsession.getMask() == null || editsession.getMask().test(Vector3
-                                                                .at(l.getBlockX(), l.getBlockY() - y, l.getBlockZ())
+                                                    if ((!brushPlayer.isFlatMode()) || l.y - y > loc.getY()) {
+                                                        if (editsession.getMask() == null || editsession.getMask().test(new Vector(l.x, l.y - y, l.z)
                                                                 .toBlockPoint())) {
-                                                            if (!(l.getBlockY() - y < 0)) {
+                                                            if (!(l.y - y < 0)) {
                                                                 try {
-                                                                    blocksToSet.put(Vector3.at(
-                                                                            l.getBlockX(),
-                                                                            l.getBlockY() + y,
-                                                                            l.getBlockZ()
-                                                                    ), BlockTypes.AIR.getDefaultState());
+                                                                    blocksToSet.put(new Vector3(
+                                                                            l.x,
+                                                                            l.y + y,
+                                                                            l.z
+                                                                    ), new BaseBlock(0));
                                                                 } catch (Exception ignored) {
                                                                 }
                                                             }
@@ -190,10 +183,11 @@ public class PlayerInteractListener implements Listener {
                                     }
                                 }
                                 for (Vector3 block : blocksToSet.keySet()) {
+                                    BlockVector vec = Vector.toBlockPoint(block.x, block.y, block.z);
                                     editsession.setBlock(
-                                            block.toBlockPoint().getBlockX(),
-                                            block.toBlockPoint().getBlockY(),
-                                            block.toBlockPoint().getBlockZ(),
+                                            vec.getBlockX(),
+                                            vec.getBlockY(),
+                                            vec.getBlockZ(),
                                             blocksToSet.get(block)
                                     );
                                 }
@@ -219,11 +213,8 @@ public class PlayerInteractListener implements Listener {
                                 double finalXMov = xMov;
                                 NestedFor.IAction threeDimensionModeXZLoops = indices -> {
 
-                                    Location loopLoc = start.clone().add(
-                                            finalZMov * indices[0],
-                                            indices[1] * finalYMod,
-                                            -finalXMov * indices[0]
-                                    );
+                                    Vector3 vec3 = start.clone().add(finalZMov * indices[0], indices[1] * finalYMod, -finalXMov * indices[0]);
+                                    Location loopLoc = new Location(vec3.x, vec3.y, vec3.z, loc.getLevel());
 
                                     if (player.getLocation().getPitch() < 0) {
                                         loopLoc.add(
@@ -248,7 +239,7 @@ public class PlayerInteractListener implements Listener {
                                     );
 
                                     if (blockLoc != null && (editsession.getMask() == null || editsession.getMask().test(
-                                            BlockVector3.at(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ())))) {
+                                            new Vector(blockLoc.x, blockLoc.y, blockLoc.z)))) {
                                         double height = BrushPlayerUtil.getHeight(
                                                 player,
                                                 indices[0] - min,
@@ -263,41 +254,40 @@ public class PlayerInteractListener implements Listener {
                                             height++;
                                         }
                                         for (int y = 0; y < height; y++) {
-                                            Vector _v = v.clone().multiply(-1).multiply(y);
+                                            Vector _v = v.multiply(-1).multiply(y);
                                             if (brushPlayer.isDirectionMode()) {
                                                 if (!brushPlayer.isFlatMode()) {
                                                     try {
                                                         blocksToSet.put(
-                                                                Vector3.at(
-                                                                        blockLoc.getBlockX() + _v.getBlockX(),
-                                                                        blockLoc.getBlockY() + _v.getBlockY(),
-                                                                        blockLoc.getBlockZ() + _v.getBlockZ()
+                                                                new Vector3(
+                                                                        blockLoc.x + _v.getBlockX(),
+                                                                        blockLoc.y + _v.getBlockY(),
+                                                                        blockLoc.z + _v.getBlockZ()
                                                                 ),
-                                                                editsession.getBlock(Vector3
-                                                                        .at(
-                                                                                blockLoc.getBlockX(),
-                                                                                blockLoc.getBlockY(),
-                                                                                blockLoc.getBlockZ()
+                                                                editsession.getBlock(new Vector(
+                                                                                blockLoc.x,
+                                                                                blockLoc.y,
+                                                                                blockLoc.z
                                                                         )
                                                                         .toBlockPoint())
                                                         );
                                                     } catch (Exception ignored) {
                                                     }
                                                 } else {
-                                                    Location place = blockLoc.clone().add(v.clone().multiply(-1).multiply(y));
+                                                    Vector v_ = v.multiply(-1).multiply(y);
+                                                    Location place = blockLoc.clone().add(v_.getBlockX(), v_.getBlockY(), v_.getBlockZ());
                                                     if (place.distance(loopLoc) > loc.distance(start)) {
                                                         try {
                                                             blocksToSet.put(
-                                                                    Vector3.at(
-                                                                            blockLoc.getBlockX() + _v.getBlockX(),
-                                                                            blockLoc.getBlockY() + _v.getBlockY(),
-                                                                            blockLoc.getBlockZ() + _v.getBlockZ()
+                                                                    new Vector3(
+                                                                            blockLoc.x + _v.getBlockX(),
+                                                                            blockLoc.y + _v.getBlockY(),
+                                                                            blockLoc.z + _v.getBlockZ()
                                                                     ),
-                                                                    editsession.getBlock(Vector3
-                                                                            .at(
-                                                                                    blockLoc.getBlockX(),
-                                                                                    blockLoc.getBlockY(),
-                                                                                    blockLoc.getBlockZ()
+                                                                    editsession.getBlock(new Vector(
+                                                                                    blockLoc.x,
+                                                                                    blockLoc.y,
+                                                                                    blockLoc.z
                                                                             )
                                                                             .toBlockPoint())
                                                             );
@@ -309,38 +299,36 @@ public class PlayerInteractListener implements Listener {
                                                 if (!brushPlayer.isFlatMode()) {
                                                     try {
                                                         blocksToSet.put(
-                                                                Vector3.at(
-                                                                        blockLoc.getBlockX() + _v.getBlockX(),
-                                                                        blockLoc.getBlockY() + _v.getBlockY(),
-                                                                        blockLoc.getBlockZ() + _v.getBlockZ()
+                                                                new Vector3(
+                                                                        blockLoc.x + _v.getBlockX(),
+                                                                        blockLoc.y + _v.getBlockY(),
+                                                                        blockLoc.z + _v.getBlockZ()
                                                                 ),
-                                                                editsession.getBlock(Vector3
-                                                                        .at(
-                                                                                blockLoc.getBlockX(),
-                                                                                blockLoc.getBlockY(),
-                                                                                blockLoc.getBlockZ()
+                                                                editsession.getBlock(new Vector(
+                                                                                blockLoc.x,
+                                                                                blockLoc.y,
+                                                                                blockLoc.z
                                                                         )
                                                                         .toBlockPoint())
                                                         );
                                                     } catch (Exception ignored) {
                                                     }
                                                 } else {
-                                                    Location place = blockLoc.clone().add(v.clone().multiply(1).multiply(y - 1));
+                                                    Vector v_ = v.multiply(1).multiply(y - 1);
+                                                    Location place = blockLoc.clone().add(v_.getBlockX(), v_.getBlockY(), v_.getBlockZ());
                                                     if (place.distance(loopLoc) < loc.distance(start) - 1) {
                                                         try {
                                                             blocksToSet.put(
-                                                                    Vector3.at(
-                                                                            blockLoc.getBlockX() + _v.getBlockX(),
-                                                                            blockLoc.getBlockY() + _v.getBlockY(),
-                                                                            blockLoc.getBlockZ() + _v.getBlockZ()
+                                                                    new Vector3(
+                                                                            blockLoc.x + _v.getBlockX(),
+                                                                            blockLoc.y + _v.getBlockY(),
+                                                                            blockLoc.z + _v.getBlockZ()
                                                                     ),
-                                                                    editsession.getBlock(Vector3
-                                                                            .at(
-                                                                                    blockLoc.getBlockX(),
-                                                                                    blockLoc.getBlockY(),
-                                                                                    blockLoc.getBlockZ()
-                                                                            )
-                                                                            .toBlockPoint())
+                                                                    editsession.getBlock(new Vector(
+                                                                                    blockLoc.x,
+                                                                                    blockLoc.y,
+                                                                                    blockLoc.z
+                                                                            ).toBlockPoint())
                                                             );
                                                         } catch (Exception ignored) {
                                                         }
@@ -356,17 +344,17 @@ public class PlayerInteractListener implements Listener {
                                 for (Vector3 block : blocksToSet.keySet()) {
                                     if (brushPlayer.isDirectionMode()) {
                                         editsession.setBlock(
-                                                block.toBlockPoint().getBlockX(),
-                                                block.toBlockPoint().getBlockY(),
-                                                block.toBlockPoint().getBlockZ(),
+                                                (int) block.x,
+                                                (int) block.y,
+                                                (int) block.z,
                                                 blocksToSet.get(block)
                                         );
                                     } else {
                                         editsession.setBlock(
-                                                block.toBlockPoint().getBlockX(),
-                                                block.toBlockPoint().getBlockY(),
-                                                block.toBlockPoint().getBlockZ(),
-                                                BlockTypes.AIR.getDefaultState()
+                                                (int) block.x,
+                                                (int) block.y,
+                                                (int) block.z,
+                                                new BaseBlock(0)
                                         );
                                     }
                                 }
@@ -381,11 +369,11 @@ public class PlayerInteractListener implements Listener {
                     }
                 }
             });
-        } else if ((event.getPlayer().getInventory().getItemInMainHand().getType() == XMaterial.FLINT.parseMaterial())
-                && ((event.getAction().equals(Action.LEFT_CLICK_AIR))
-                || (event.getAction().equals(Action.LEFT_CLICK_BLOCK)))) {
+        } else if ((event.getPlayer().getInventory().getItemInHand().getId() == ItemID.FLINT)
+                && ((event.getAction().equals(PlayerInteractEvent.Action.LEFT_CLICK_AIR))
+                || (event.getAction().equals(PlayerInteractEvent.Action.LEFT_CLICK_BLOCK)))) {
             event.setCancelled(true);
-            player.openInventory(GuiGenerator.generateMainMenu(Session.getBrushPlayer(player.getUniqueId())));
+            GuiGenerator.openMenu(player, GuiGenerator.generateMainMenu(Session.getBrushPlayer(player.getUniqueId())));
         }
     }
 

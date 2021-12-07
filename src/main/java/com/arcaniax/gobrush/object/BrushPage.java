@@ -26,15 +26,13 @@
  */
 package com.arcaniax.gobrush.object;
 
+import cn.nukkit.item.Item;
+import cn.nukkit.item.MinecraftItemID;
+import cn.nukkit.utils.TextFormat;
 import com.arcaniax.gobrush.GoBrushPlugin;
 import com.arcaniax.gobrush.Session;
-import com.arcaniax.gobrush.util.XMaterial;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import com.nukkitx.fakeinventories.inventory.DoubleChestFakeInventory;
+import com.nukkitx.fakeinventories.inventory.FakeInventory;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -54,17 +52,12 @@ import java.util.stream.IntStream;
 public class BrushPage {
 
     /* Attributes */
-    private static final String BRUSH_MENU_INVENTORY_TITLE = "&1goBrush Brushes";
-    private static final ItemStack GRAY_GLASS_PANE = createItem(
-            XMaterial.GRAY_STAINED_GLASS_PANE.parseMaterial(),
-            (short) XMaterial.GRAY_STAINED_GLASS_PANE.data,
-            "&6",
-            ""
-    );
-    private static final ItemStack EXIT = createItem(XMaterial.BARRIER.parseMaterial(), (short) 0, "&cBack to main menu", "");
-    private static final ItemStack PREVIOUS_PAGE = createItem(XMaterial.ARROW.parseMaterial(), (short) 0, "&6Previous page", "");
-    private static final ItemStack NEXT_PAGE = createItem(XMaterial.ARROW.parseMaterial(), (short) 0, "&6Next page", "");
-    private final Inventory INVENTORY;
+    private static final String BRUSH_MENU_INVENTORY_TITLE = TextFormat.BLUE + "goBrush Brushes";
+    private static final Item GRAY_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 7, TextFormat.GOLD.toString(), "");
+    private static final Item EXIT = createItem(MinecraftItemID.BARRIER.get(1), 0, TextFormat.RED + "Back to main menu", "");
+    private static final Item PREVIOUS_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Previous page", "");
+    private static final Item NEXT_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Next page", "");
+    private final FakeInventory INVENTORY;
     private final int PAGE_NUMBER;
 
     /**
@@ -81,10 +74,8 @@ public class BrushPage {
     public BrushPage(List<Brush> brushes, int pageNumber, int pageCount) {
 
         this.PAGE_NUMBER = pageNumber;
-        this.INVENTORY = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes(
-                '&',
-                BRUSH_MENU_INVENTORY_TITLE + "&8 | &5Page " + (pageNumber + 1)
-        ));
+        this.INVENTORY = new DoubleChestFakeInventory();
+        INVENTORY.setTitle(BRUSH_MENU_INVENTORY_TITLE + "&8 | &5Page " + (pageNumber + 1));
 
         for (int i = 0; i < 54; i++) {
             INVENTORY.setItem(i, GRAY_GLASS_PANE);
@@ -101,8 +92,8 @@ public class BrushPage {
         IntStream.range(0, brushes.size()).parallel().forEach(i -> {
             INVENTORY.setItem(
                     i,
-                    createItem(XMaterial.MAP.parseMaterial(),
-                            (short) 0,
+                    createItem(MinecraftItemID.EMPTY_MAP.get(1),
+                            0,
                             "&e" + brushes.get(i).getName(),
                             getImageLore(getBrush(brushes.get(i).getName()))
                     )
@@ -110,41 +101,13 @@ public class BrushPage {
         });
     }
 
-    private static ItemStack createItem(Material material, short data, String name, String lore) {
-        ItemStack is = new ItemStack(material);
-        ItemMeta meta = is.getItemMeta();
-        if (!lore.equals("")) {
-            String[] loreListArray = lore.split("___");
-            List<String> loreList = new ArrayList<String>();
-            String[] arrayOfString1;
-            int j = (arrayOfString1 = loreListArray).length;
-            for (int i = 0; i < j; i++) {
-                String s = arrayOfString1[i];
-                loreList.add(ChatColor.translateAlternateColorCodes('&', s));
-            }
-            meta.setLore(loreList);
-        }
-        if (!name.equals("")) {
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        }
-        is.setItemMeta(meta);
-        is.setDurability(data);
-        return is;
+    private static Item createItem(Item item, int damage, String name, String... lore) {
+        item.setCustomName(name).setLore(lore);
+        item.setDamage(damage);
+        return item;
     }
 
-    private static ItemStack createItem(Material material, short data, String name, List<String> lore) {
-        ItemStack is = new ItemStack(material);
-        ItemMeta meta = is.getItemMeta();
-        meta.setLore(lore);
-        if (!name.equals("")) {
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        }
-        is.setItemMeta(meta);
-        is.setDurability(data);
-        return is;
-    }
-
-    private List<String> getImageLore(BufferedImage img) {
+    private String[] getImageLore(BufferedImage img) {
         List<String> loreList = new ArrayList<String>();
         loreList.add("\u00A70");
         for (int z = 0; z < Session.getConfig().getImgLoreSize(); z++) {
@@ -155,7 +118,7 @@ public class BrushPage {
             }
             loreList.add(s);
         }
-        return loreList;
+        return loreList.toArray(new String[]{});
     }
 
     private String getChatColor(float grayScale) {
@@ -212,7 +175,7 @@ public class BrushPage {
      *
      * @return The Inventory object of this BrushPage.
      */
-    public Inventory getInventory() {
+    public FakeInventory getInventory() {
         return INVENTORY;
     }
 
