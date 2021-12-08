@@ -259,7 +259,7 @@ public class GuiGenerator {
                     } else {
                         Session.initializeBrushMenu();
                         GuiGenerator.closeInventory(player, event.getInventory());
-                        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(Session.getBrushMenu().getPage(0).getInventory()), 20, true);
+                        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(Session.getBrushMenu().getPage(0).getInventory()), 40, true);
                     }
                 } else {
                     event.getInventory().setItem(
