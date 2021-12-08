@@ -50,11 +50,11 @@ import java.util.Optional;
 public class GuiGenerator {
 
     private static final String MAIN_MENU_INVENTORY_TITLE = TextFormat.BLUE + "goBrush Menu";
-    private static final Item GRAY_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 7, TextFormat.GOLD.toString(), "");
-    private static final Item GREEN_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 13, TextFormat.GOLD.toString(), "");
-    private static final Item ORANGE_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 1, TextFormat.GOLD.toString(), "");
-    private static final Item RED_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 14, TextFormat.GOLD.toString(), "");
-    private static final Item WHITE_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 0, TextFormat.GOLD.toString(), "");
+    private static final Item GRAY_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 7, TextFormat.GOLD.toString(), "");
+    private static final Item GREEN_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 13, TextFormat.GOLD.toString(), "");
+    private static final Item ORANGE_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 1, TextFormat.GOLD.toString(), "");
+    private static final Item RED_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 14, TextFormat.GOLD.toString(), "");
+    private static final Item WHITE_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 0, TextFormat.GOLD.toString(), "");
 
     private static final String PERMISSION_BYPASS_MAXSIZE = "gobrush.bypass.maxsize";
     private static final String PERMISSION_BYPASS_MAXINTENSITY = "gobrush.bypass.maxintensity";
