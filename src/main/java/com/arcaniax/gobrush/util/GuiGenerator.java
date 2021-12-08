@@ -199,7 +199,7 @@ public class GuiGenerator {
             int slot = event.getAction().getSlot();
 
             if (MainMenuSlot.MODE_DIRECTION.isValidSlot(slot)) {
-                mainMenu.setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + (brushPlayer1.toggleDirectionMode() ? "Pull" : "Push") + " Mode").setLore(TextFormat.GRAY + "Click to change"));
+                mainMenu.setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName("" + TextFormat.RESET + TextFormat.GOLD + (brushPlayer1.toggleDirectionMode() ? "Pull" : "Push") + " Mode").setLore("" + TextFormat.RESET + TextFormat.GRAY + "Click to change"));
             } else if (MainMenuSlot.MODE_FLAT.isValidSlot(slot)) {
                 event.getInventory().setItem(
                         slot,
