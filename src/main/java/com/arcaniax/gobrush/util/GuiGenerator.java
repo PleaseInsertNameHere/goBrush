@@ -284,7 +284,7 @@ public class GuiGenerator {
     public static void openMenu(Player player, Inventory inventory) {
         closeInventory(player);
 
-        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 20, true);
+        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 60, true);
     }
 
     public static void closeInventory(Player player) {
