@@ -210,7 +210,7 @@ public class GuiGenerator {
                         )
                 );
             } else if (MainMenuSlot.MODE_3D.isValidSlot(slot)) {
-                event.getInventory().setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "3D Mode").setLore((brushPlayer1.toggle3DMode() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"));
+                event.getInventory().setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName("" + TextFormat.RESET + TextFormat.GOLD + "3D Mode").setLore("" + TextFormat.RESET + (brushPlayer1.toggle3DMode() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"));
             } else if (MainMenuSlot.FEATURE_AUTOROTATION.isValidSlot(slot)) {
                 event.getInventory().setItem(
                         slot,
