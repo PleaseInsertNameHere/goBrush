@@ -6,7 +6,7 @@
 
     <groupId>com.arcaniax</groupId>
     <artifactId>goBrush</artifactId>
-    <version>3.8.0</version>
+    <version>${version}</version>
     <build>
         <plugins>
             <plugin>
@@ -16,6 +16,17 @@
                     <source>8</source>
                     <target>8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -36,13 +47,10 @@
         </dependency>
         <dependency>
             <groupId>com.boydti</groupId>
-            <artifactId>fawe-api</artifactId>
-            <version>latest</version>
-        </dependency>
-        <dependency>
-            <groupId>com.boydti</groupId>
             <artifactId>fawe-nukkit</artifactId>
-            <version>latest</version>
+            <version>19.03.29-d13b946-1257-22.0.14</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/FastAsyncWorldEdit-nukkit-19.03.29-d13b946-1257-22.0.14.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.nukkitx</groupId>
@@ -60,5 +68,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+
+        <version>3.8.0</version>
     </properties>
 </project>
