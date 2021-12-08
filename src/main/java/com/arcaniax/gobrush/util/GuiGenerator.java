@@ -258,7 +258,8 @@ public class GuiGenerator {
                         player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.RED + "Extract the zip into " + TextFormat.YELLOW + "/plugins/goBrush/brushes");
                     } else {
                         Session.initializeBrushMenu();
-                        player.addWindow(Session.getBrushMenu().getPage(0).getInventory());
+                        GuiGenerator.closeInventory(player, event.getInventory());
+                        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(Session.getBrushMenu().getPage(0).getInventory()), 20, true);
                     }
                 } else {
                     event.getInventory().setItem(
@@ -282,15 +283,10 @@ public class GuiGenerator {
     }
 
     public static void openMenu(Player player, Inventory inventory) {
-        closeInventory(player);
-
-        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 60, true);
+        player.addWindow(inventory);
     }
 
-    public static void closeInventory(Player player) {
-        Optional<Inventory> inv = player.getTopWindow();
-        if (inv.isPresent() && inv.get() instanceof FakeInventory) {
-            player.removeWindow(inv.get());
-        }
+    public static void closeInventory(Player player, Inventory inventory) {
+        player.removeWindow(inventory);
     }
 }

@@ -116,7 +116,7 @@ public class BrushPage {
                     break;
                 }
                 case (49): {
-                    GuiGenerator.closeInventory(player);
+                    GuiGenerator.closeInventory(player, event.getInventory());
                     break;
                 }
                 case (53): {
@@ -131,7 +131,7 @@ public class BrushPage {
                             Brush brush = Session.getBrush(name);
                             brushPlayer.setBrush(brush);
                             brushPlayer.getBrush().resize(size);
-                            GuiGenerator.closeInventory(player);
+                            GuiGenerator.closeInventory(player, event.getInventory());
                         }
                     }
                 }
