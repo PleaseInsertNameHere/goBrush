@@ -71,7 +71,11 @@ public class BrushPlayerUtil {
     }
 
     public static Location getClosest(Player player) {
-        Location loc = player.getTargetBlock(200).getLocation();
+        Block block = player.getTargetBlock(200);
+        if (block == null) {
+            return null;
+        }
+        Location loc = block.getLocation();
         while (loc.getLevelBlock().getId() == BlockID.AIR) {
             Vector3 v3 = player.getDirectionVector();
             Vector v = new Vector(v3.x, v3.y, v3.z);
