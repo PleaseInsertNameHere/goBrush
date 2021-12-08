@@ -57,9 +57,9 @@ public class BrushPage {
     /* Attributes */
     private static final String BRUSH_MENU_INVENTORY_TITLE = TextFormat.BLUE + "goBrush Brushes";
     private static final Item GRAY_GLASS_PANE = createItem(MinecraftItemID.STAINED_GLASS_PANE.get(1), 7, TextFormat.GOLD.toString(), "");
-    private static final Item EXIT = createItem(MinecraftItemID.BARRIER.get(1), 0, TextFormat.RED + "Back to main menu", "");
-    private static final Item PREVIOUS_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Previous page", "");
-    private static final Item NEXT_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Next page", "");
+    private static final Item EXIT = createItem(MinecraftItemID.BARRIER.get(1), 0, "" + TextFormat.RESET + TextFormat.RED + "Back to main menu", "");
+    private static final Item PREVIOUS_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, "" + TextFormat.RESET + TextFormat.GOLD + "Previous page", "");
+    private static final Item NEXT_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, "" + TextFormat.RESET + TextFormat.GOLD + "Next page", "");
     private final FakeInventory INVENTORY;
     private final FakeInventoryListener LISTENER;
     private final int PAGE_NUMBER;
@@ -97,7 +97,7 @@ public class BrushPage {
                 i,
                 createItem(MinecraftItemID.EMPTY_MAP.get(1),
                         0,
-                        TextFormat.YELLOW + brushes.get(i).getName(),
+                        "" + TextFormat.RESET + TextFormat.YELLOW + brushes.get(i).getName(),
                         getImageLore(getBrush(brushes.get(i).getName()))
                 )
         ));
