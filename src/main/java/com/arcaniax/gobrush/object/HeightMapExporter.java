@@ -32,6 +32,7 @@ import com.arcaniax.gobrush.GoBrushPlugin;
 import com.boydti.fawe.nukkit.core.NukkitWorldEdit;
 import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.regions.Region;
 
 import javax.imageio.ImageIO;
@@ -52,7 +53,7 @@ public class HeightMapExporter {
     Level w;
     Player p;
 
-    public HeightMapExporter(Player p) {
+    public HeightMapExporter(Player p) throws IncompleteRegionException {
         Region selection = NukkitWorldEdit.inst().getSession(p).getWorldSelection();
         if (selection != null) {
             worldEditSelection = true;
