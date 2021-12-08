@@ -79,7 +79,7 @@ public class BrushPage {
 
         this.PAGE_NUMBER = pageNumber;
         this.INVENTORY = new DoubleChestFakeInventory();
-        INVENTORY.setTitle(BRUSH_MENU_INVENTORY_TITLE + TextFormat.DARK_GRAY + " | " + TextFormat.DARK_PURPLE + "Page " + (pageNumber + 1));
+        INVENTORY.setTitle(BRUSH_MENU_INVENTORY_TITLE + TextFormat.DARK_GRAY);
 
         for (int i = 0; i < 54; i++) {
             INVENTORY.setItem(i, GRAY_GLASS_PANE);
