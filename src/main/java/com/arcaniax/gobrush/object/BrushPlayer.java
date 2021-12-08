@@ -66,15 +66,17 @@ public class BrushPlayer {
     /**
      * This method toggles whether or not the brush is enabled.
      */
-    public void toggleBrushEnabled() {
+    public boolean toggleBrushEnabled() {
         brushEnabled = !brushEnabled;
+        return brushEnabled;
     }
 
     /**
      * This method toggles whether or not flat mode is enabled.
      */
-    public void toggleFlatMode() {
+    public boolean toggleFlatMode() {
         flatMode = !flatMode;
+        return flatMode;
     }
 
     /**
@@ -85,15 +87,17 @@ public class BrushPlayer {
     /**
      * This method toggles whether or not the bounding box feature is enabled.
      */
-    public void toggle3DMode() {
+    public boolean toggle3DMode() {
         _3dmode = !_3dmode;
+        return _3dmode;
     }
 
     /**
      * This method toggles whether or not the auto rotate feature is enabled.
      */
-    public void toggleAutoRotation() {
+    public boolean toggleAutoRotation() {
         autoRotation = !autoRotation;
+        return autoRotation;
     }
 
     /**
@@ -147,8 +151,9 @@ public class BrushPlayer {
      *
      * @param brushIntensity The brush intensity.
      */
-    public void setBrushIntensity(int brushIntensity) {
+    public int setBrushIntensity(int brushIntensity) {
         this.brushIntensity = brushIntensity;
+        return brushIntensity;
     }
 
     /**
@@ -234,8 +239,9 @@ public class BrushPlayer {
         return Session.getConfig().getMaxBrushIntensity();
     }
 
-    public void toggleDirectionMode() {
+    public boolean toggleDirectionMode() {
         directionMode = !directionMode;
+        return directionMode;
     }
 
 }

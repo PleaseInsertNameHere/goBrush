@@ -26,6 +26,13 @@
  */
 package com.arcaniax.gobrush.object;
 
+import cn.nukkit.Player;
+import cn.nukkit.item.MinecraftItemID;
+import cn.nukkit.utils.TextFormat;
+import com.arcaniax.gobrush.Session;
+import com.arcaniax.gobrush.util.GuiGenerator;
+import com.nukkitx.fakeinventories.inventory.FakeInventory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +74,52 @@ public class BrushMenu {
             }
             this.PAGES.add(page);
         }
+    }
+
+    /**
+     * This method updates contents of old BrushPage
+     *
+     * @param old The old inventory to update contents of
+     * @param page The new page to take the contents of
+     */
+    public void update(FakeInventory old, BrushPage page) {
+        old.setContents(page.getInventory().getContents());
+        page.getInventory().removeListener(page.getListener());
+        page.getInventory().addListener(event -> {
+            event.setCancelled(true);
+
+            Player player = event.getPlayer();
+            BrushPlayer brushPlayer = Session.getBrushPlayer(player.getUniqueId());
+            BrushMenu brushMenu = Session.getBrushMenu();
+            int slot = event.getAction().getSlot();
+            int pageNum = page.getPageNumber();
+            switch (slot) {
+                case (45): {
+                    brushMenu.update(event.getInventory(), brushMenu.getPage(pageNum == 0 ? brushMenu.getAmountOfPages() - 1 : pageNum - 1));
+                    break;
+                }
+                case (49): {
+                    GuiGenerator.closeInventory(player);
+                    break;
+                }
+                case (53): {
+                    brushMenu.update(event.getInventory(), brushMenu.getPage(pageNum == (brushMenu.getAmountOfPages() - 1) ? 0 : pageNum + 1));
+                    break;
+                }
+                default: {
+                    if (event.getInventory().getItem(slot) != null) {
+                        if (event.getInventory().getItem(slot).getId() == MinecraftItemID.EMPTY_MAP.get(1).getId()) {
+                            String name = TextFormat.clean(event.getInventory().getItem(slot).getCustomName());
+                            int size = brushPlayer.getBrushSize();
+                            Brush brush = Session.getBrush(name);
+                            brushPlayer.setBrush(brush);
+                            brushPlayer.getBrush().resize(size);
+                            GuiGenerator.closeInventory(player);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**

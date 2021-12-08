@@ -29,6 +29,7 @@ package com.arcaniax.gobrush.listener;
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.ItemID;
 import cn.nukkit.level.Location;
@@ -358,7 +359,6 @@ public class PlayerInteractListener implements Listener {
                                 blocksToSet.clear();
                             }
                         } finally {
-
                             editsession.commit();
                         }
                     } finally {
@@ -374,5 +374,10 @@ public class PlayerInteractListener implements Listener {
         }
     }
 
-
+    @EventHandler
+    public void onBreak(BlockBreakEvent event) {
+        if (event.getPlayer().hasPermission(PERMISSION_USE) && event.getItem() != null && !event.getItem().isNull() && event.getItem().getId() == ItemID.FLINT) {
+            event.setCancelled(true);
+        }
+    }
 }

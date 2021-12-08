@@ -56,6 +56,9 @@ public class GuiGenerator {
     private static final Item RED_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 14, TextFormat.GOLD.toString(), "");
     private static final Item WHITE_GLASS_PANE = createItem(MinecraftItemID.GLASS_PANE.get(1), 0, TextFormat.GOLD.toString(), "");
 
+    private static final String PERMISSION_BYPASS_MAXSIZE = "gobrush.bypass.maxsize";
+    private static final String PERMISSION_BYPASS_MAXINTENSITY = "gobrush.bypass.maxintensity";
+
     /**
      * This method generates the goBrush main menu based on the BrushPlayer's
      * settings.
@@ -74,16 +77,16 @@ public class GuiGenerator {
                 11,
                 createItem(MinecraftItemID.BROWN_MUSHROOM.get(1),
                         0,
-                        "&6Size: &e" + brushPlayer.getBrushSize(),
-                        "&63D Size: &e" + (double) brushPlayer.getBrushSize() / 4.0 + "___&3___&7Left click to increase&3___&7Right click to decrease___&7Shift click to change by 10"
+                        TextFormat.GOLD + "Size: " + TextFormat.YELLOW + brushPlayer.getBrushSize(),
+                        TextFormat.GOLD + "3D Size: " + TextFormat.YELLOW + (double) brushPlayer.getBrushSize() / 4.0 + "\n\n" + TextFormat.GRAY + "Left click to increase\nRight click to decrease\nShift click to change by 10"
                 )
         );
         mainMenu.setItem(
                 12,
                 createItem(MinecraftItemID.BLAZE_POWDER.get(1),
                         0,
-                        "&6Intensity: &e" + brushPlayer.getBrushIntensity(),
-                        "&3___&7Left click to increase&3___&7Right click to decrease"
+                        TextFormat.GOLD + "Intensity: " + TextFormat.YELLOW + brushPlayer.getBrushIntensity(),
+                        "\n" + TextFormat.GRAY + "Left click to increase\nRight click to decrease"
                 )
         );
         if (brushPlayer.getBrushSize() > brushPlayer.getMaxBrushSize()) {
@@ -104,9 +107,9 @@ public class GuiGenerator {
             mainMenu.setItem(
                     10,
                     createItem(MinecraftItemID.WRITABLE_BOOK.get(1),
-                            (short) 0,
-                            "&6Selected Brush: &e" + brushPlayer.getBrush().getName(),
-                            "&a&lEnabled___&7___&7Left click to change brush___&7Right click to toggle"
+                            0,
+                            TextFormat.GOLD + "Selected Brush: " + TextFormat.YELLOW + brushPlayer.getBrush().getName(),
+                            "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Left click to change brush\nRight click to toggle"
                     )
             );
             mainMenu.setItem(1, GREEN_GLASS_PANE);
@@ -115,29 +118,29 @@ public class GuiGenerator {
             mainMenu.setItem(
                     10,
                     createItem(MinecraftItemID.WRITABLE_BOOK.get(1),
-                            (short) 0,
-                            "&6Selected Brush: &e" + brushPlayer.getBrush().getName(),
-                            "&c&lDisabled___&7___&7Left click to change brush___&7Right click to toggle"
+                            0,
+                            TextFormat.GOLD + "Selected Brush: " + TextFormat.YELLOW + brushPlayer.getBrush().getName(),
+                            "" + TextFormat.RED + TextFormat.BOLD + "Disabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Left click to change brush\nRight click to toggle"
                     )
             );
             mainMenu.setItem(1, RED_GLASS_PANE);
             mainMenu.setItem(19, RED_GLASS_PANE);
         }
         if (brushPlayer.isDirectionMode()) {
-            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName("&6Pull Mode").setLore("&7Click to change"));
+            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "Pull Mode").setLore(TextFormat.GRAY + "Click to change"));
             mainMenu.setItem(4, ORANGE_GLASS_PANE);
             mainMenu.setItem(22, ORANGE_GLASS_PANE);
         } else {
-            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName("&6Push Mode").setLore("&7Click to change"));
+            mainMenu.setItem(13, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "Push Mode").setLore(TextFormat.GRAY + "Click to change"));
             mainMenu.setItem(4, ORANGE_GLASS_PANE);
             mainMenu.setItem(22, ORANGE_GLASS_PANE);
         }
         if (brushPlayer.is3DMode()) {
-            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName("&63D Mode").setLore("&a&lEnabled___&7___&7Click to toggle"));
+            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "3D Mode").setLore("" + TextFormat.GREEN + TextFormat.BOLD + "Enabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"));
             mainMenu.setItem(5, GREEN_GLASS_PANE);
             mainMenu.setItem(23, GREEN_GLASS_PANE);
         } else {
-            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName("&63D Mode").setLore("&c&lDisabled___&7___&7Click to toggle"));
+            mainMenu.setItem(14, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "3D Mode").setLore("" + TextFormat.RED + TextFormat.BOLD + "Disabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"));
             mainMenu.setItem(5, RED_GLASS_PANE);
             mainMenu.setItem(23, RED_GLASS_PANE);
         }
@@ -146,8 +149,8 @@ public class GuiGenerator {
                     15,
                     createItem(MinecraftItemID.HEAVY_WEIGHTED_PRESSURE_PLATE.get(1),
                             (short) 0,
-                            "&6Flat Mode",
-                            "&a&lEnabled___&7___&7Click to toggle"
+                            TextFormat.GOLD + "Flat Mode",
+                            "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
                     )
             );
             mainMenu.setItem(6, GREEN_GLASS_PANE);
@@ -157,8 +160,8 @@ public class GuiGenerator {
                     15,
                     createItem(MinecraftItemID.HEAVY_WEIGHTED_PRESSURE_PLATE.get(1),
                             0,
-                            "&6Flat Mode",
-                            "&c&lDisabled___&7___&7Click to toggle"
+                            TextFormat.GOLD + "Flat Mode",
+                            "" + TextFormat.RED + TextFormat.BOLD + "Disabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
                     )
             );
             mainMenu.setItem(6, RED_GLASS_PANE);
@@ -170,8 +173,8 @@ public class GuiGenerator {
                     16,
                     createItem(MinecraftItemID.COMPASS.get(1),
                             0,
-                            "&6Auto Rotation",
-                            "&a&lEnabled___&7___&7Click to toggle"
+                            TextFormat.GOLD + "Auto Rotation",
+                            "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
                     )
             );
             mainMenu.setItem(7, GREEN_GLASS_PANE);
@@ -182,12 +185,93 @@ public class GuiGenerator {
                     createItem(MinecraftItemID.COMPASS.get(1),
                             0,
                             "&6Auto Rotation",
-                            "&c&lDisabled___&7___&7Click to toggle"
+                            "" + TextFormat.RED + TextFormat.BOLD + "Disabled\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
                     )
             );
             mainMenu.setItem(7, RED_GLASS_PANE);
             mainMenu.setItem(25, RED_GLASS_PANE);
         }
+        mainMenu.addListener(event -> {
+            event.setCancelled(true);
+
+            Player player = event.getPlayer();
+            BrushPlayer brushPlayer1 = Session.getBrushPlayer(player.getUniqueId());
+            int slot = event.getAction().getSlot();
+
+            if (MainMenuSlot.MODE_DIRECTION.isValidSlot(slot)) {
+                mainMenu.setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + (brushPlayer1.toggleDirectionMode() ? "Pull" : "Push") + " Mode").setLore(TextFormat.GRAY + "Click to change"));
+            } else if (MainMenuSlot.MODE_FLAT.isValidSlot(slot)) {
+                event.getInventory().setItem(
+                        slot,
+                        createItem(MinecraftItemID.HEAVY_WEIGHTED_PRESSURE_PLATE.get(1),
+                                0,
+                                TextFormat.GOLD + "Flat Mode",
+                                (brushPlayer1.toggleFlatMode() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
+                        )
+                );
+            } else if (MainMenuSlot.MODE_3D.isValidSlot(slot)) {
+                event.getInventory().setItem(slot, MinecraftItemID.SKULL.get(1).setCustomName(TextFormat.GOLD + "3D Mode").setLore((brushPlayer1.toggle3DMode() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"));
+            } else if (MainMenuSlot.FEATURE_AUTOROTATION.isValidSlot(slot)) {
+                event.getInventory().setItem(
+                        slot,
+                        createItem(MinecraftItemID.COMPASS.get(1),
+                        0,
+                        TextFormat.GOLD + "Auto Rotation",
+                        (brushPlayer1.toggleAutoRotation() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Click to toggle"
+                ));
+            } else if (MainMenuSlot.BRUSH_INTENSITY.isValidSlot(slot)) {
+                int intensity = brushPlayer1.getBrushIntensity() + 1;
+                if (player.hasPermission(PERMISSION_BYPASS_MAXINTENSITY) || intensity <= brushPlayer1.getMaxBrushIntensity()) {
+                    event.getInventory().setItem(
+                            slot,
+                            createItem(MinecraftItemID.BLAZE_POWDER.get(1),
+                                    0,
+                                    TextFormat.GOLD + "Intensity: " + TextFormat.YELLOW + brushPlayer1.setBrushIntensity(intensity),
+                                    "\n" + TextFormat.GRAY + "Left click to increase\nRight click to decrease"
+                            )
+                    );
+                }
+            } else if (MainMenuSlot.BRUSH_SIZE.isValidSlot(slot)) {
+                int size = brushPlayer1.getBrushSize() + 2;
+                if (player.hasPermission(PERMISSION_BYPASS_MAXSIZE) || size <= brushPlayer1.getMaxBrushSize()) {
+                    brushPlayer1.setBrushSize(size);
+                    brushPlayer1.getBrush().resize(size);
+                    event.getInventory().setItem(
+                            slot,
+                            createItem(MinecraftItemID.BROWN_MUSHROOM.get(1),
+                                    0,
+                                    TextFormat.GOLD + "Size: " + TextFormat.YELLOW + size,
+                                    TextFormat.GOLD + "3D Size: " + TextFormat.YELLOW + (double) size / 4.0 + "\n\n" + TextFormat.GRAY + "Left click to increase\nRight click to decrease\nShift click to change by 10"
+                            )
+                    );
+                }
+            } else if (MainMenuSlot.BRUSH_SELECTOR.isValidSlot(slot)) {
+                if (event.getAction().getSourceItem() != null
+                        && event.getAction().getSourceItem().getId() != Item.AIR
+                        && event.getAction().getTargetItem() != null
+                        && event.getAction().getTargetItem().getId() != Item.AIR
+                ) {
+                    int amountOfValidBrushes = GoBrushPlugin.amountOfValidBrushes;
+                    if (amountOfValidBrushes == 0) {
+                        player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.RED + "WARNING! The automatic brush installation failed because the server cannot connect to GitHub.");
+                        player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.GOLD + "Download the default brushes manually here: https://github.com/Arcaniax-Development/goBrush-Assets/blob/main/brushes.zip?raw=true");
+                        player.sendMessage(TextFormat.AQUA + "goBrush> " + TextFormat.RED + "Extract the zip into " + TextFormat.YELLOW + "/plugins/goBrush/brushes");
+                    } else {
+                        Session.initializeBrushMenu();
+                        player.addWindow(Session.getBrushMenu().getPage(0).getInventory());
+                    }
+                } else {
+                    event.getInventory().setItem(
+                            slot,
+                            createItem(MinecraftItemID.WRITABLE_BOOK.get(1),
+                                    0,
+                                    TextFormat.GOLD + "Selected Brush: " + TextFormat.YELLOW + brushPlayer.getBrush().getName(),
+                                    (brushPlayer1.toggleBrushEnabled() ? "" + TextFormat.GREEN + TextFormat.BOLD + "Enabled" : "" + TextFormat.RED + TextFormat.BOLD + "Disabled") + "\n\n" + TextFormat.RESET + TextFormat.GRAY + "Left click to change brush\nRight click to toggle"
+                            )
+                    );
+                }
+            }
+        });
         return mainMenu;
     }
 
@@ -198,11 +282,15 @@ public class GuiGenerator {
     }
 
     public static void openMenu(Player player, Inventory inventory) {
+        closeInventory(player);
+
+        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 20, true);
+    }
+
+    public static void closeInventory(Player player) {
         Optional<Inventory> inv = player.getTopWindow();
         if (inv.isPresent() && inv.get() instanceof FakeInventory) {
             player.removeWindow(inv.get());
         }
-
-        Server.getInstance().getScheduler().scheduleDelayedTask(GoBrushPlugin.getPlugin(), () -> player.addWindow(inventory), 20, true);
     }
 }

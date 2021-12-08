@@ -26,13 +26,16 @@
  */
 package com.arcaniax.gobrush.object;
 
+import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.MinecraftItemID;
 import cn.nukkit.utils.TextFormat;
 import com.arcaniax.gobrush.GoBrushPlugin;
 import com.arcaniax.gobrush.Session;
+import com.arcaniax.gobrush.util.GuiGenerator;
 import com.nukkitx.fakeinventories.inventory.DoubleChestFakeInventory;
 import com.nukkitx.fakeinventories.inventory.FakeInventory;
+import com.nukkitx.fakeinventories.inventory.FakeInventoryListener;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -58,6 +61,7 @@ public class BrushPage {
     private static final Item PREVIOUS_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Previous page", "");
     private static final Item NEXT_PAGE = createItem(MinecraftItemID.ARROW.get(1), 0, TextFormat.GOLD + "Next page", "");
     private final FakeInventory INVENTORY;
+    private final FakeInventoryListener LISTENER;
     private final int PAGE_NUMBER;
 
     /**
@@ -75,7 +79,7 @@ public class BrushPage {
 
         this.PAGE_NUMBER = pageNumber;
         this.INVENTORY = new DoubleChestFakeInventory();
-        INVENTORY.setTitle(BRUSH_MENU_INVENTORY_TITLE + "&8 | &5Page " + (pageNumber + 1));
+        INVENTORY.setTitle(BRUSH_MENU_INVENTORY_TITLE + TextFormat.DARK_GRAY + " | " + TextFormat.DARK_PURPLE + "Page " + (pageNumber + 1));
 
         for (int i = 0; i < 54; i++) {
             INVENTORY.setItem(i, GRAY_GLASS_PANE);
@@ -89,16 +93,51 @@ public class BrushPage {
         }
         Collections.sort(brushes);
 
-        IntStream.range(0, brushes.size()).parallel().forEach(i -> {
-            INVENTORY.setItem(
-                    i,
-                    createItem(MinecraftItemID.EMPTY_MAP.get(1),
-                            0,
-                            "&e" + brushes.get(i).getName(),
-                            getImageLore(getBrush(brushes.get(i).getName()))
-                    )
-            );
-        });
+        IntStream.range(0, brushes.size()).parallel().forEach(i -> INVENTORY.setItem(
+                i,
+                createItem(MinecraftItemID.EMPTY_MAP.get(1),
+                        0,
+                        TextFormat.YELLOW + brushes.get(i).getName(),
+                        getImageLore(getBrush(brushes.get(i).getName()))
+                )
+        ));
+
+        LISTENER = event -> {
+            event.setCancelled(true);
+
+            Player player = event.getPlayer();
+            BrushPlayer brushPlayer = Session.getBrushPlayer(player.getUniqueId());
+            BrushMenu brushMenu = Session.getBrushMenu();
+            int slot = event.getAction().getSlot();
+            int page = this.PAGE_NUMBER;
+            switch (slot) {
+                case (45): {
+                    brushMenu.update(event.getInventory(), brushMenu.getPage(page == 0 ? brushMenu.getAmountOfPages() - 1 : page - 1));
+                    break;
+                }
+                case (49): {
+                    GuiGenerator.closeInventory(player);
+                    break;
+                }
+                case (53): {
+                    brushMenu.update(event.getInventory(), brushMenu.getPage(page == (brushMenu.getAmountOfPages() - 1) ? 0 : page + 1));
+                    break;
+                }
+                default: {
+                    if (event.getInventory().getItem(slot) != null) {
+                        if (event.getInventory().getItem(slot).getId() == MinecraftItemID.EMPTY_MAP.get(1).getId()) {
+                            String name = TextFormat.clean(event.getInventory().getItem(slot).getCustomName());
+                            int size = brushPlayer.getBrushSize();
+                            Brush brush = Session.getBrush(name);
+                            brushPlayer.setBrush(brush);
+                            brushPlayer.getBrush().resize(size);
+                            GuiGenerator.closeInventory(player);
+                        }
+                    }
+                }
+            }
+        };
+        INVENTORY.addListener(LISTENER);
     }
 
     private static Item createItem(Item item, int damage, String name, String... lore) {
@@ -177,6 +216,15 @@ public class BrushPage {
      */
     public FakeInventory getInventory() {
         return INVENTORY;
+    }
+
+    /**
+     * Getter for the Listener object of this BrushPage.
+     *
+     * @return The Listener object of this BrushPage.
+     */
+    public FakeInventoryListener getListener() {
+        return LISTENER;
     }
 
     /**

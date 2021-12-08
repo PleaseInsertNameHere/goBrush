@@ -28,7 +28,6 @@ package com.arcaniax.gobrush;
 
 import cn.nukkit.plugin.PluginBase;
 import com.arcaniax.gobrush.command.CommandHandler;
-import com.arcaniax.gobrush.listener.InventoryClickListener;
 import com.arcaniax.gobrush.listener.PlayerInteractListener;
 import com.arcaniax.gobrush.listener.PlayerJoinListener;
 import com.arcaniax.gobrush.listener.PlayerQuitListener;
@@ -73,7 +72,6 @@ public class GoBrushPlugin extends PluginBase {
     private void registerListeners() {
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
-        this.getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
     }
 
